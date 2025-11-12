@@ -225,7 +225,7 @@ export async function getNDCsByRxCUI(rxcui: string): Promise<NDCRetrievalResult>
       };
     }
 
-    debugLog(`FDA NDC API doesn't support direct RxCUI searches for RxCUI: ${(rxcui || '').trim()}`);
+    debugLog(`FDA NDC API does not support direct RxCUI searches for RxCUI: ${rxcui?.trim()}`);
 
     // FDA NDC API doesnt support direct RxCUI searches
     return {
