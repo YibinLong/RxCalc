@@ -1,0 +1,541 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Environment",
+        "description": "Initialize the project environment and configure necessary settings.",
+        "details": "Create a new SvelteKit project and configure TypeScript. Set up the .env file with API keys and URLs as specified in the PRD. Ensure the project is ready for development with all necessary configurations.",
+        "testStrategy": "Verify that the environment variables are correctly loaded and accessible in the application. Ensure the project builds and runs without errors.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize SvelteKit Project",
+            "description": "Create a new SvelteKit project using the command line.",
+            "dependencies": [],
+            "details": "Use the command `npm create svelte@latest my-project` to initialize a new SvelteKit project. Follow the prompts to set up the project structure.",
+            "status": "pending",
+            "testStrategy": "Ensure the project initializes without errors and the default page loads successfully."
+          },
+          {
+            "id": 2,
+            "title": "Configure TypeScript",
+            "description": "Set up TypeScript in the newly created SvelteKit project.",
+            "dependencies": [
+              1
+            ],
+            "details": "Install TypeScript and necessary types using `npm install -D typescript @sveltejs/kit`. Configure `tsconfig.json` with appropriate settings for the project.",
+            "status": "pending",
+            "testStrategy": "Verify TypeScript configuration by running the project and checking for type errors."
+          },
+          {
+            "id": 3,
+            "title": "Set Up Environment Variables",
+            "description": "Configure the .env file with API keys and URLs as specified in the PRD.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a `.env` file in the project root. Add the necessary API keys and URLs as specified in the PRD. Ensure these variables are accessible in the application.",
+            "status": "pending",
+            "testStrategy": "Test that environment variables are correctly loaded by logging them in the application and checking their values."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Build Input Form",
+        "description": "Develop the input form for drug name, NDC, SIG, and days’ supply.",
+        "details": "Create a Svelte component for the input form. Use TypeScript for form validation and ensure it accepts free-text drug names or NDCs. Include fields for SIG and days’ supply.",
+        "testStrategy": "Test form validation with various inputs, including edge cases like empty fields and invalid data. Ensure the form submits data correctly.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Form UI in Svelte",
+            "description": "Develop the user interface for the input form using Svelte.",
+            "dependencies": [],
+            "details": "Design the form layout with fields for drug name/NDC, SIG, and days’ supply. Ensure the UI is responsive and accessible.",
+            "status": "pending",
+            "testStrategy": "Verify UI elements render correctly and are accessible."
+          },
+          {
+            "id": 2,
+            "title": "Implement TypeScript Form Validation",
+            "description": "Add TypeScript-based validation for the input form fields.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use TypeScript to validate inputs for drug name/NDC, SIG, and days’ supply. Ensure validation rules are comprehensive and handle edge cases.",
+            "status": "pending",
+            "testStrategy": "Test validation with valid, invalid, and edge case inputs."
+          },
+          {
+            "id": 3,
+            "title": "Handle Form Submission Logic",
+            "description": "Implement logic to handle form submission and data processing.",
+            "dependencies": [
+              2
+            ],
+            "details": "Ensure form data is correctly captured and prepared for submission. Handle any errors gracefully and provide user feedback.",
+            "status": "pending",
+            "testStrategy": "Test form submission with various input scenarios, ensuring data is processed correctly."
+          },
+          {
+            "id": 4,
+            "title": "Test Edge Cases and Error Handling",
+            "description": "Conduct thorough testing of the form for edge cases and error handling.",
+            "dependencies": [
+              3
+            ],
+            "details": "Identify and test edge cases such as empty fields, invalid data, and unexpected input formats. Ensure error messages are clear and helpful.",
+            "status": "pending",
+            "testStrategy": "Perform manual and automated tests to verify robust error handling and edge case management."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Integrate RxNorm API",
+        "description": "Implement API integration to normalize drug names to RxCUI.",
+        "details": "Use the RxNorm API to convert input drug names or NDCs to a standardized RxCUI. Handle API responses and errors gracefully, displaying appropriate messages to the user.",
+        "testStrategy": "Mock API responses to test various scenarios, including successful normalization and error handling for invalid inputs.",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up RxNorm API Authentication",
+            "description": "Configure authentication for accessing the RxNorm API.",
+            "dependencies": [],
+            "details": "Obtain API keys and set up authentication headers required for accessing the RxNorm API.",
+            "status": "pending",
+            "testStrategy": "Verify authentication by making a test API call."
+          },
+          {
+            "id": 2,
+            "title": "Implement API Call Functionality",
+            "description": "Develop the function to call the RxNorm API with drug names or NDCs.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a function to send requests to the RxNorm API, handling both drug names and NDCs as inputs.",
+            "status": "pending",
+            "testStrategy": "Test API calls with mock data to ensure correct request formation."
+          },
+          {
+            "id": 3,
+            "title": "Handle API Responses and Errors",
+            "description": "Process API responses and manage errors effectively.",
+            "dependencies": [
+              2
+            ],
+            "details": "Parse the API response to extract RxCUI and handle errors such as invalid inputs or server issues.",
+            "status": "pending",
+            "testStrategy": "Simulate API errors and verify error handling logic."
+          },
+          {
+            "id": 4,
+            "title": "Display API Results to Users",
+            "description": "Show the normalized RxCUI or error messages to users.",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement UI components to display RxCUI results or error messages based on API responses.",
+            "status": "pending",
+            "testStrategy": "Test UI updates with various API response scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Test Integration with Mock Data",
+            "description": "Conduct comprehensive testing using mock data to simulate API interactions.",
+            "dependencies": [
+              4
+            ],
+            "details": "Use mock data to test the entire integration flow, including successful and failed API calls.",
+            "status": "pending",
+            "testStrategy": "Verify that all components work together seamlessly with mock data."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Implement NDC Retrieval",
+        "description": "Fetch valid NDCs and package sizes using the FDA NDC Directory API.",
+        "details": "Call the FDA NDC Directory API with the RxCUI to retrieve NDCs and package sizes. Flag inactive NDCs and handle API errors gracefully.",
+        "testStrategy": "Test API calls with valid and invalid RxCUIs. Verify that the correct data is retrieved and inactive NDCs are flagged appropriately.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate FDA NDC Directory API",
+            "description": "Set up and integrate the FDA NDC Directory API to retrieve NDCs and package sizes.",
+            "dependencies": [],
+            "details": "Use the RxCUI to call the FDA NDC Directory API. Ensure the API is correctly integrated and can fetch data.",
+            "status": "pending",
+            "testStrategy": "Test API calls with valid RxCUIs to ensure data is retrieved."
+          },
+          {
+            "id": 2,
+            "title": "Process Retrieved NDC Data",
+            "description": "Process and filter the NDC data retrieved from the API.",
+            "dependencies": [
+              1
+            ],
+            "details": "Parse the API response to extract NDCs and package sizes. Filter out inactive NDCs and prepare data for further use.",
+            "status": "pending",
+            "testStrategy": "Verify that inactive NDCs are correctly flagged and filtered."
+          },
+          {
+            "id": 3,
+            "title": "Implement Error Handling for API Calls",
+            "description": "Add error handling for API failures and invalid responses.",
+            "dependencies": [
+              1
+            ],
+            "details": "Handle API errors gracefully by implementing try-catch blocks and checking response statuses. Log errors for debugging.",
+            "status": "pending",
+            "testStrategy": "Simulate API failures and invalid responses to ensure errors are handled correctly."
+          },
+          {
+            "id": 4,
+            "title": "Test NDC Retrieval with Various Inputs",
+            "description": "Conduct testing of the NDC retrieval process with different input scenarios.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Test the entire retrieval process using valid and invalid RxCUIs. Ensure that data is processed correctly and errors are managed.",
+            "status": "pending",
+            "testStrategy": "Use a variety of RxCUIs to test the retrieval and processing of NDCs, ensuring all edge cases are covered."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Develop Quantity Calculation Logic",
+        "description": "Compute the correct dispense quantity based on SIG and days’ supply.",
+        "details": "Parse the SIG to determine dosage per day and multiply by days’ supply to calculate total units. Select the optimal NDC combination for dispensing.",
+        "testStrategy": "Test with various SIG formats and days’ supply values. Ensure calculations are accurate and handle edge cases like fractional doses.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Parse SIG for Dosage Information",
+            "description": "Extract dosage information from the SIG to determine daily dosage.",
+            "dependencies": [],
+            "details": "Develop a parser to interpret SIG strings and extract dosage per day. Handle various SIG formats and ensure accurate parsing.",
+            "status": "pending",
+            "testStrategy": "Test with diverse SIG formats to ensure accurate parsing."
+          },
+          {
+            "id": 2,
+            "title": "Calculate Total Dispense Quantity",
+            "description": "Compute total units to dispense based on dosage and days’ supply.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use the parsed dosage information and multiply by the days’ supply to calculate the total dispense quantity. Ensure calculations handle fractional doses.",
+            "status": "pending",
+            "testStrategy": "Verify calculations with different dosage and days’ supply combinations."
+          },
+          {
+            "id": 3,
+            "title": "Select Optimal NDC Combination",
+            "description": "Determine the best NDC combination for dispensing the calculated quantity.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement logic to select the most efficient NDC combination based on the calculated quantity. Consider availability and cost factors.",
+            "status": "pending",
+            "testStrategy": "Test NDC selection logic with various scenarios to ensure optimal choices."
+          },
+          {
+            "id": 4,
+            "title": "Test Quantity Calculation Logic",
+            "description": "Conduct comprehensive testing of the entire quantity calculation logic.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Develop test cases covering all aspects of the quantity calculation logic, including edge cases and error handling.",
+            "status": "pending",
+            "testStrategy": "Run tests with a variety of inputs to ensure accuracy and robustness."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Design Output Display",
+        "description": "Create UI to display optimal NDC(s) and quantities with status indicators.",
+        "details": "Develop a Svelte component to render a table of candidate NDCs, highlighting the optimal recommendation. Include options to copy JSON output.",
+        "testStrategy": "Verify that the UI displays data correctly, with proper highlighting and status indicators. Test the JSON copy functionality.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design UI Layout for NDC Display",
+            "description": "Create a visual layout for displaying NDCs and quantities.",
+            "dependencies": [],
+            "details": "Design a table layout using Figma or similar tools to display candidate NDCs with status indicators. Ensure the design highlights optimal recommendations and includes a button for copying JSON output.",
+            "status": "pending",
+            "testStrategy": "Review design with stakeholders for feedback."
+          },
+          {
+            "id": 2,
+            "title": "Implement Data Rendering in Svelte Component",
+            "description": "Develop the Svelte component to render NDC data.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use Svelte to create a component that renders the NDC data in a table format. Implement logic to highlight optimal NDCs and display status indicators. Include functionality to copy JSON output to clipboard.",
+            "status": "pending",
+            "testStrategy": "Test rendering with sample data to ensure correct display and functionality."
+          },
+          {
+            "id": 3,
+            "title": "Test Display Accuracy and Interactivity",
+            "description": "Verify the accuracy and interactivity of the NDC display.",
+            "dependencies": [
+              2
+            ],
+            "details": "Conduct tests to ensure the UI displays data accurately with correct highlighting and status indicators. Verify the JSON copy functionality works as intended.",
+            "status": "pending",
+            "testStrategy": "Perform user testing and automated tests to validate display accuracy and interactivity."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Error and Notification Handling",
+        "description": "Add error handling and notifications for invalid or inactive NDCs.",
+        "details": "Use SvelteKit's error handling to display toast notifications for warnings and errors. Highlight inactive NDCs in the UI and allow users to proceed with caution.",
+        "testStrategy": "Test error scenarios by simulating API failures and invalid inputs. Ensure notifications are displayed correctly and users can continue as needed.",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Error Handling for Invalid NDCs",
+            "description": "Develop logic to handle errors for invalid NDCs using SvelteKit.",
+            "dependencies": [],
+            "details": "Use SvelteKit's error handling to catch and manage errors related to invalid NDCs. Ensure that appropriate error messages are displayed to the user.",
+            "status": "pending",
+            "testStrategy": "Simulate invalid NDC inputs and verify error messages are displayed correctly."
+          },
+          {
+            "id": 2,
+            "title": "Design Notification System for Inactive NDCs",
+            "description": "Create a notification system to alert users about inactive NDCs.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement toast notifications using SvelteKit to inform users when they encounter inactive NDCs. Allow users to proceed with caution after acknowledging the notification.",
+            "status": "pending",
+            "testStrategy": "Test with inactive NDCs to ensure notifications appear and allow user continuation."
+          },
+          {
+            "id": 3,
+            "title": "Test Error and Notification Handling Scenarios",
+            "description": "Develop and execute test scenarios for error and notification handling.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Create comprehensive test cases to simulate various error conditions and notification triggers. Ensure that all scenarios are covered and notifications are displayed as expected.",
+            "status": "pending",
+            "testStrategy": "Use automated testing tools to simulate API failures and invalid inputs, verifying that notifications and error handling work as intended."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Setup Logging and Debugging",
+        "description": "Implement logging and debugging features for development and production.",
+        "details": "Use console.log and SvelteKit's error handling for structured logging. Implement conditional logging based on the DEBUG environment variable.",
+        "testStrategy": "Verify that logs are correctly outputted based on the DEBUG flag. Test error boundary UI for failed fetches.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Conditional Logging",
+            "description": "Set up logging that activates based on the DEBUG environment variable.",
+            "dependencies": [],
+            "details": "Use console.log for basic logging and integrate with SvelteKit's error handling. Ensure logs are only output when the DEBUG variable is set to true.",
+            "status": "pending",
+            "testStrategy": "Verify logs appear only when DEBUG is true."
+          },
+          {
+            "id": 2,
+            "title": "Setup Debugging Tools",
+            "description": "Integrate debugging tools for development and production environments.",
+            "dependencies": [
+              1
+            ],
+            "details": "Research and integrate a suitable debugging tool compatible with SvelteKit. Ensure it provides meaningful insights during development and production.",
+            "status": "pending",
+            "testStrategy": "Test the debugging tool in both environments to ensure it captures necessary information."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Deploy to Google Cloud Run",
+        "description": "Deploy the application to Google Cloud Run for production use.",
+        "details": "Follow the GCP deployment instructions to deploy the application. Ensure all necessary services are enabled and the deployment is successful.",
+        "testStrategy": "Test the deployed application to ensure it functions as expected in the production environment. Verify that all features are accessible and performant.",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Enable Required GCP Services",
+            "description": "Enable all necessary Google Cloud Platform services for deployment.",
+            "dependencies": [],
+            "details": "Identify and enable services such as Cloud Run, IAM, and any other required APIs in the GCP console.",
+            "status": "pending",
+            "testStrategy": "Verify that all services are enabled by checking the GCP console."
+          },
+          {
+            "id": 2,
+            "title": "Configure Cloud Run Environment",
+            "description": "Set up the environment configurations for Google Cloud Run.",
+            "dependencies": [
+              1
+            ],
+            "details": "Configure environment variables, service accounts, and permissions needed for the application to run on Cloud Run.",
+            "status": "pending",
+            "testStrategy": "Ensure configurations are correct by reviewing the Cloud Run settings page."
+          },
+          {
+            "id": 3,
+            "title": "Deploy Application to Cloud Run",
+            "description": "Deploy the application to Google Cloud Run for production use.",
+            "dependencies": [
+              2
+            ],
+            "details": "Use the Google Cloud SDK to deploy the application, following the deployment instructions and ensuring all configurations are applied.",
+            "status": "pending",
+            "testStrategy": "Check the deployment logs and verify that the application is running without errors."
+          },
+          {
+            "id": 4,
+            "title": "Verify Deployment Success",
+            "description": "Ensure the application is successfully deployed and operational on Cloud Run.",
+            "dependencies": [
+              3
+            ],
+            "details": "Access the deployed application URL and test all features to confirm they are working as expected.",
+            "status": "pending",
+            "testStrategy": "Perform end-to-end testing to ensure all features are accessible and functioning correctly."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Conduct Performance Testing",
+        "description": "Ensure the application processes queries in under 2 seconds.",
+        "details": "Use performance testing tools to measure response times for various queries. Optimize code and API calls to meet the performance goal.",
+        "testStrategy": "Conduct load testing to simulate multiple users and measure response times. Ensure the application consistently meets the performance criteria.",
+        "priority": "medium",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Select and Install Performance Testing Tools",
+            "description": "Choose appropriate tools for performance testing and install them.",
+            "dependencies": [],
+            "details": "Research and select tools like JMeter or LoadRunner. Install the selected tools on the testing environment.",
+            "status": "pending",
+            "testStrategy": "Verify installation by running a sample test."
+          },
+          {
+            "id": 2,
+            "title": "Configure Testing Environment",
+            "description": "Set up the environment for performance testing.",
+            "dependencies": [
+              1
+            ],
+            "details": "Ensure the testing environment mirrors the production setup. Configure network settings and database connections.",
+            "status": "pending",
+            "testStrategy": "Run a baseline test to confirm environment readiness."
+          },
+          {
+            "id": 3,
+            "title": "Design Test Scenarios",
+            "description": "Create scenarios to simulate real-world usage.",
+            "dependencies": [
+              2
+            ],
+            "details": "Develop test cases that reflect typical user interactions and peak load conditions. Include various query types.",
+            "status": "pending",
+            "testStrategy": "Review scenarios with stakeholders to ensure coverage."
+          },
+          {
+            "id": 4,
+            "title": "Execute Performance Tests",
+            "description": "Run the designed test scenarios and collect data.",
+            "dependencies": [
+              3
+            ],
+            "details": "Use the testing tools to execute scenarios. Monitor response times and system performance under load.",
+            "status": "pending",
+            "testStrategy": "Ensure tests run without errors and data is accurately recorded."
+          },
+          {
+            "id": 5,
+            "title": "Analyze Results and Optimize Code",
+            "description": "Analyze test results and optimize application performance.",
+            "dependencies": [
+              4
+            ],
+            "details": "Identify bottlenecks from test data. Optimize code and API calls to improve response times.",
+            "status": "pending",
+            "testStrategy": "Re-run tests post-optimization to verify improvements."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-12T05:34:17.518Z",
+      "updated": "2025-11-12T05:34:17.518Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
