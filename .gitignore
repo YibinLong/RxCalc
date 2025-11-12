@@ -27,5 +27,24 @@ node_modules/
 # Roo AI configuration with API keys
 .roo/mcp.json
 
-# Roo AI configuration with API keys
-.roo/mcp.json
+# TaskMaster - local task state (personal to each developer)
+.taskmaster/tasks/tasks.json
+.taskmaster/state.json
+
+# SvelteKit build artifacts (NEVER commit these)
+.svelte-kit/
+build/
+
+# Docker
+.dockerignore
+
+# Performance testing files
+artillery-results.json
+lighthouse-*.json
+performance-test*.yml
+test-data*.csv
+test-form.html
+test-processor.cjs
+test-scenarios.md
+clinic-bundle.js
+PERFORMANCE_ANALYSIS.md
