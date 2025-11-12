@@ -1,0 +1,203 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Environment",
+        "description": "Initialize the SvelteKit project and configure environment variables.",
+        "details": "1. Initialize a new SvelteKit project using TypeScript.\n2. Create a `.env` file and add the necessary environment variables as specified in the PRD.\n3. Install necessary dependencies including SvelteKit, TypeScript, and any other required packages.\n4. Set up ESLint for TypeScript.",
+        "testStrategy": "Verify that the project builds successfully and environment variables are accessible.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Build Drug Input Form",
+        "description": "Create a form to accept drug name, NDC, SIG, and days’ supply.",
+        "details": "1. Use SvelteKit to create a form component.\n2. Include fields for drug name/NDC, SIG, and days’ supply.\n3. Validate inputs for correct format and completeness.\n4. Style the form for usability and clarity.",
+        "testStrategy": "Test form validation with various inputs, ensuring errors are displayed for invalid entries.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Integrate RxNorm API",
+        "description": "Connect to the RxNorm API to normalize drug names or NDCs to RxCUI.",
+        "details": "1. Use fetch API in SvelteKit to call the RxNorm API.\n2. Handle API responses and errors gracefully.\n3. Display the normalized RxCUI and name to the user.\n4. Implement retry logic for API timeouts.",
+        "testStrategy": "Mock API responses to test normalization logic and error handling.",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Fetch NDC Data from FDA API",
+        "description": "Retrieve NDC data and package sizes from the FDA NDC Directory API.",
+        "details": "1. Use fetch API to call the FDA NDC Directory API with the RxCUI.\n2. Parse the response to extract NDC codes, package sizes, and active status.\n3. Implement error handling for 404s and other potential issues.",
+        "testStrategy": "Test API calls with valid and invalid RxCUIs to ensure correct data retrieval and error handling.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Quantity Calculation Logic",
+        "description": "Calculate the correct dispense quantity based on SIG and days’ supply.",
+        "details": "1. Parse the SIG to determine dosage per day.\n2. Multiply by days’ supply to compute total quantity.\n3. Select the optimal NDC combination for dispensing.",
+        "testStrategy": "Use unit tests to verify calculations with various SIG formats and days’ supply values.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Parse SIG for Dosage Calculation",
+            "description": "Develop logic to parse the SIG and determine the dosage per day.",
+            "dependencies": [],
+            "details": "Implement a parser to extract dosage information from the SIG. Ensure it handles various SIG formats accurately.",
+            "status": "pending",
+            "testStrategy": "Use unit tests to verify parsing accuracy with different SIG formats."
+          },
+          {
+            "id": 2,
+            "title": "Calculate Total Quantity Based on Days’ Supply",
+            "description": "Multiply the parsed dosage by the days’ supply to compute the total quantity.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a function to calculate the total quantity by multiplying the daily dosage by the number of days supplied.",
+            "status": "pending",
+            "testStrategy": "Test with different dosage and days’ supply values to ensure correct calculations."
+          },
+          {
+            "id": 3,
+            "title": "Select Optimal NDC Combination for Dispensing",
+            "description": "Develop logic to select the best NDC combination for dispensing based on calculated quantity.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement an algorithm to choose the optimal NDCs that match the calculated quantity, considering availability and cost.",
+            "status": "pending",
+            "testStrategy": "Verify selection logic with various NDC combinations and quantities."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Design Output Display",
+        "description": "Create a UI to display NDCs, quantities, and recommendations.",
+        "details": "1. Use SvelteKit to render a table of candidate NDCs with details.\n2. Highlight the optimal recommendation.\n3. Implement a 'Copy JSON' button for exporting data.",
+        "testStrategy": "Perform UI tests to ensure data is displayed correctly and JSON export functions as expected.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Error and Notification Handling",
+        "description": "Add error messages and notifications for invalid or inactive NDCs.",
+        "details": "1. Highlight inactive NDCs in red.\n2. Use SvelteKit's built-in notification system to display toast messages for errors and warnings.\n3. Allow users to proceed despite warnings.",
+        "testStrategy": "Simulate errors and verify that notifications are displayed correctly.",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Setup Logging and Debugging",
+        "description": "Implement logging for debugging and performance monitoring.",
+        "details": "1. Use `console.log` and SvelteKit's `error()` for structured logging.\n2. Implement conditional logging based on the DEBUG environment variable.\n3. Log API response times for performance monitoring.",
+        "testStrategy": "Check logs for accuracy and completeness during various operations.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Deploy to Google Cloud Run",
+        "description": "Deploy the application to Google Cloud Run for production use.",
+        "details": "1. Follow the GCP deployment instructions in the PRD.\n2. Ensure all environment variables are correctly set in the GCP environment.\n3. Test the deployment to ensure the application runs as expected.",
+        "testStrategy": "Access the deployed application and verify all features are functional.",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Conduct End-to-End Testing",
+        "description": "Perform comprehensive testing of the entire application workflow.",
+        "details": "1. Test the entire workflow from input to output.\n2. Verify that all features meet the acceptance criteria outlined in the PRD.\n3. Conduct user testing to gather feedback on usability and performance.",
+        "testStrategy": "Use automated end-to-end testing tools and manual testing to ensure all features work as intended.",
+        "priority": "medium",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Setup Automated Testing Framework",
+            "description": "Implement an automated testing framework for end-to-end testing.",
+            "dependencies": [],
+            "details": "Use tools like Selenium or Cypress to automate the testing of the entire application workflow. Ensure the framework covers all critical paths and edge cases.",
+            "status": "pending",
+            "testStrategy": "Run automated tests on CI/CD pipeline to ensure stability."
+          },
+          {
+            "id": 2,
+            "title": "Conduct Manual Testing",
+            "description": "Perform manual testing to verify features against acceptance criteria.",
+            "dependencies": [
+              1
+            ],
+            "details": "Manually test each feature as per the acceptance criteria outlined in the PRD. Document any discrepancies or bugs found during testing.",
+            "status": "pending",
+            "testStrategy": "Use a checklist to ensure all features are manually verified."
+          },
+          {
+            "id": 3,
+            "title": "Collect User Feedback on Usability",
+            "description": "Gather feedback from users to assess usability and performance.",
+            "dependencies": [
+              2
+            ],
+            "details": "Conduct user testing sessions to gather feedback on the application's usability and performance. Use surveys or interviews to collect detailed insights.",
+            "status": "pending",
+            "testStrategy": "Analyze feedback to identify common issues and areas for improvement."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-12T09:01:51.520Z",
+      "updated": "2025-11-12T09:01:51.520Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
