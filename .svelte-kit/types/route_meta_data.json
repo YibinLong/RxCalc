@@ -1,3 +1,6 @@
 {
-	"/": []
+	"/": [],
+	"/api/performance-test": [
+		"src/routes/api/performance-test/+server.ts"
+	]
 }
