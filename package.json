@@ -11,17 +11,31 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "perf:load": "artillery run performance-test.yml",
+    "perf:lighthouse": "lighthouse http://localhost:5173 --output=html --output-path=./lighthouse-report.html",
+    "perf:lighthouse:ci": "lighthouse http://localhost:5173 --config-path=lighthouse-config.js",
+    "perf:autocannon": "autocannon -c 10 -d 30 http://localhost:5173",
+    "perf:clinic": "node clinic-bundle.js",
+    "perf:all": "npm run perf:lighthouse && npm run perf:autocannon && npm run perf:load",
+    "perf:comprehensive": "node scripts/run-performance-tests.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/kit": "^2.47.1",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "artillery": "^2.0.21",
+    "autocannon": "^8.0.0",
+    "clinic": "^13.0.0",
     "dotenv": "^17.2.3",
+    "lighthouse-cli": "^0.1.2",
     "svelte": "^5.41.0",
     "svelte-check": "^4.3.3",
     "typescript": "^5.9.3",
     "vite": "^7.1.10",
     "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "@sveltejs/adapter-node": "^5.4.0"
   }
 }
