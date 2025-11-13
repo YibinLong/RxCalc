@@ -61,7 +61,9 @@ function handleAPIError(error: any, context: string): RxNormError {
  * Makes a GET request to the RxNorm API
  */
 async function makeAPIRequest(endpoint: string, params: Record<string, string> = {}): Promise<any> {
-  const url = new URL(`${RXNORM_BASE_URL}${endpoint}`);
+  // Ensure we hit the JSON variant of the endpoint
+  const endpointWithJson = endpoint.endsWith('.json') ? endpoint : `${endpoint}.json`;
+  const url = new URL(`${RXNORM_BASE_URL}${endpointWithJson}`);
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.append(key, value);
   });
@@ -69,11 +71,12 @@ async function makeAPIRequest(endpoint: string, params: Record<string, string> =
   const cacheKey = url.toString();
   const cachedData = getCachedData(cacheKey);
   if (cachedData) {
-    logApi.request('GET', endpoint, { cached: true });
+    logApi.request('GET', endpointWithJson, { cached: true });
     return cachedData;
   }
 
-  logApi.request('GET', endpoint, { url: url.toString() });
+  logApi.request('GET', endpointWithJson, { url: url.toString() });
+  console.log('🌐 RxNorm API Request:', url.toString());
 
   try {
     const response = await fetch(url.toString(), {
@@ -84,17 +87,22 @@ async function makeAPIRequest(endpoint: string, params: Record<string, string> =
       }
     });
 
+    console.log('📡 RxNorm API Response Status:', response.status, response.statusText);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ RxNorm API Error Response:', errorText);
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('✅ RxNorm API Data:', data);
     setCachedData(cacheKey, data);
-    logApi.response('GET', endpoint, 200, { cached: false, dataSize: JSON.stringify(data).length });
+    logApi.response('GET', endpointWithJson, 200, { cached: false, dataSize: JSON.stringify(data).length });
     return data;
 
   } catch (error) {
-    throw handleAPIError(error, endpoint);
+    throw handleAPIError(error, endpointWithJson);
   }
 }
 
@@ -127,24 +135,41 @@ export async function normalizeDrugToRxCUI(drugInput: string): Promise<DrugNorma
 
     if (isNDC) {
       // For NDC input, use the ndcstatus endpoint to get RxCUI
-      logApi.request('POST', '/normalize', { type: 'NDC', input: cleanedInput });
-      apiData = await makeAPIRequest('/ndcstatus', { ndc: cleanedInput });
+      // RxNorm API requires NDCs in 11-digit format WITHOUT hyphens
+      const ndcForRxNorm = cleanedInput.replace(/[^0-9]/g, '');
+      console.log('🔍 NDC detected:', {
+        original: cleanedInput,
+        formatted: ndcForRxNorm,
+        length: ndcForRxNorm.length
+      });
+      logApi.request('POST', '/normalize', { type: 'NDC', input: cleanedInput, formattedForAPI: ndcForRxNorm });
+      apiData = await makeAPIRequest('/ndcstatus', { ndc: ndcForRxNorm });
 
-      if (apiData.status?.code !== 200) {
-        return {
-          success: false,
-          drugName: cleanedInput,
-          error: {
-            code: 'NDC_NOT_FOUND',
-            message: 'NDC not found in RxNorm database',
-            details: `The NDC ${cleanedInput} was not found or is invalid`
-          }
-        };
+      console.log('📡 RxNorm API response:', apiData);
+
+      // The ndcstatus endpoint returns {ndcStatus: {rxcui, conceptName, ndcStatus}}
+      if (!apiData.ndcStatus || !apiData.ndcStatus.rxcui) {
+        console.warn('⚠️ No rxcui in initial ndcstatus response, trying altpkg=1 fallback...');
+        const altData = await makeAPIRequest('/ndcstatus', { ndc: ndcForRxNorm, altpkg: '1' });
+        console.log('📡 RxNorm API altpkg=1 response:', altData);
+        if (!altData?.ndcStatus?.rxcui) {
+          console.error('❌ No RxCUI found even with altpkg=1:', altData);
+          return {
+            success: false,
+            drugName: cleanedInput,
+            error: {
+              code: 'NDC_NOT_FOUND',
+              message: 'NDC not found in RxNorm database',
+              details: `The NDC ${cleanedInput} was not found or is invalid. The NDC may be inactive or not in the RxNorm database.`
+            }
+          };
+        }
+        apiData = altData;
       }
 
       // Extract RxCUI from NDC status response
-      const rxcui = apiData.idGroup?.rxnormId?.[0];
-      if (!rxcui) {
+      const ndcStatusObj = apiData.ndcStatus as { rxcui?: string; conceptName?: string; ndcStatus?: string };
+      if (!ndcStatusObj || !ndcStatusObj.rxcui) {
         return {
           success: false,
           drugName: cleanedInput,
@@ -155,26 +180,34 @@ export async function normalizeDrugToRxCUI(drugInput: string): Promise<DrugNorma
           }
         };
       }
+      const rxcui = ndcStatusObj.rxcui;
+      const drugName = ndcStatusObj.conceptName || cleanedInput;
+
+      console.log('✅ Found RxCUI from NDC:', { rxcui, drugName, ndcStatus: ndcStatusObj.ndcStatus });
 
       return {
         success: true,
         rxcui,
-        drugName: cleanedInput
+        drugName
       };
 
     } else {
       // For drug name input, use the rxcui endpoint
+      console.log('🔍 Drug name detected:', cleanedInput);
       logApi.request('POST', '/normalize', { type: 'drug_name', input: cleanedInput });
       apiData = await makeAPIRequest('/rxcui', { name: cleanedInput });
 
+      console.log('📡 RxNorm API response for drug name:', apiData);
+
       if (!apiData.idGroup?.rxnormId?.length) {
+        console.error('❌ No RxCUI found in response:', apiData);
         return {
           success: false,
           drugName: cleanedInput,
           error: {
             code: 'DRUG_NOT_FOUND',
             message: 'Drug not found in RxNorm database',
-            details: `No matching drug found for "${cleanedInput}"`
+            details: `No matching drug found for "${cleanedInput}". Try being more specific with the drug name and strength.`
           }
         };
       }
@@ -188,6 +221,7 @@ export async function normalizeDrugToRxCUI(drugInput: string): Promise<DrugNorma
     }
 
   } catch (error) {
+    console.error('❌ Exception in normalizeDrugToRxCUI:', error);
     return {
       success: false,
       drugName: cleanedInput,
@@ -228,15 +262,18 @@ export async function getNDCStatus(ndc: string): Promise<NDCStatusResult> {
       throw new Error('Invalid NDC format');
     }
 
-    logApi.request('GET', '/ndcstatus', { ndc });
-    const response = await makeAPIRequest('/ndcstatus', { ndc });
+    // RxNorm API requires NDCs in 11-digit format WITHOUT hyphens
+    const ndcForRxNorm = ndc.replace(/[^0-9]/g, '');
+    logApi.request('GET', '/ndcstatus', { ndc, formattedForAPI: ndcForRxNorm });
+    const response = await makeAPIRequest('/ndcstatus', { ndc: ndcForRxNorm });
 
-    // Extract status information from response
-    const rxcui = response.idGroup?.rxnormId?.[0];
-    const status = response.status?.code === 200 ? 'active' : 'inactive';
+    // Extract status information from response (ndcStatus endpoint structure)
+    const rxcui = response.ndcStatus?.rxcui || '';
+    const ndcStatusValue = response.ndcStatus?.ndcStatus || 'unknown';
+    const status = ndcStatusValue === 'ACTIVE' ? 'active' : ndcStatusValue === 'RETIRED' ? 'inactive' : 'unknown';
 
     return {
-      rxcui: rxcui || '',
+      rxcui: rxcui,
       ndc: ndc,
       status: status as 'active' | 'inactive' | 'unknown'
     };

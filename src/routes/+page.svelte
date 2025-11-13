@@ -352,7 +352,7 @@
           id="drugInput"
           type="text"
           bind:value={drugInput}
-          placeholder="e.g., 'Lisinopril 10mg' or '00093001505'"
+          placeholder="e.g., 'Amoxicillin' or '00093-2263-05'"
           class="form-control"
           class:has-error={errors.drugInput}
           on:input={() => clearError('drugInput')}
@@ -446,7 +446,7 @@
 
 <style>
   .container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

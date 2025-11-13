@@ -29,6 +29,19 @@ describe('Quantity Calculator', () => {
       expect(result.prn).toBe(false);
     });
 
+    it('should parse SIG with PRN and explicit frequency - "Take 1 tablet by mouth twice daily as needed"', () => {
+      const result = parseSIG('Take 1 tablet by mouth twice daily as needed');
+
+      expect(result.originalSIG).toBe('Take 1 tablet by mouth twice daily as needed');
+      expect(result.dosageInstructions).toHaveLength(1);
+      expect(result.dosageInstructions[0].amount).toBe(1);
+      expect(result.dosageInstructions[0].unit).toBe('tablet');
+      expect(result.dosageInstructions[0].frequency).toBe(2); // "twice daily" => BID
+      expect(result.totalDailyDose).toBe(2);
+      expect(result.dailyFrequency).toBe(2);
+      expect(result.prn).toBe(true);
+    });
+
     it('should parse SIG with "bid" - "Take 2 capsules PO BID"', () => {
       const result = parseSIG('Take 2 capsules PO BID');
 
@@ -97,6 +110,17 @@ describe('Quantity Calculator', () => {
       expect(result.totalQuantity).toBe(60); // 1 × 2 × 30
       expect(result.unit).toBe('tablet');
       expect(result.sig.totalDailyDose).toBe(2);
+    });
+
+    it('should calculate PRN quantity with explicit frequency - 1 tablet BID PRN for 30 days', () => {
+      const result = calculateDispenseQuantity('Take 1 tablet by mouth twice daily as needed', 30);
+
+      expect(result.success).toBe(true);
+      // Base would be 60, PRN adjustment uses max(60*0.7=42, 60-10=50) => 50
+      expect(result.totalQuantity).toBe(50);
+      expect(result.sig.prn).toBe(true);
+      expect(result.sig.totalDailyDose).toBe(2);
+      expect(result.unit).toBe('tablet');
     });
 
     it('should calculate quantity with fractional doses', () => {

@@ -27,6 +27,12 @@ export interface RxNormAPIResponse {
       }>;
     }>;
   };
+  // For ndcstatus endpoint
+  ndcStatus?: {
+    conceptName?: string;
+    rxcui?: string;
+    ndcStatus?: string;
+  };
 }
 
 export interface NDCStatusResult {

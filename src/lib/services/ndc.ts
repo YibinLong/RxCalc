@@ -97,6 +97,7 @@ async function makeAPIRequest(searchParams: Record<string, string> = {}): Promis
   }
 
   debugLog('Making API request to:', url.toString());
+  console.log('🌐 OpenFDA API Request:', url.toString());
 
   try {
     const response = await fetch(url.toString(), {
@@ -107,9 +108,12 @@ async function makeAPIRequest(searchParams: Record<string, string> = {}): Promis
       }
     });
 
+    console.log('📡 OpenFDA API Response Status:', response.status, response.statusText);
+
     if (!response.ok) {
       const errorText = await response.text();
       debugLog(`API Error Response: ${response.status} ${response.statusText}`, errorText);
+      console.error('❌ OpenFDA API Error:', errorText);
       const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
       error.status = response.status;
       error.statusText = response.statusText;
@@ -363,41 +367,100 @@ export async function searchNDCByCode(ndcCode: string): Promise<NDCRetrievalResu
       };
     }
 
-    // Clean and format the NDC code - remove non-digits
+    // Clean the NDC code - remove non-digits
     const cleanNDC = ndcCode.replace(/[^0-9]/g, '');
-    debugLog(`Searching FDA NDC API for NDC code: ${cleanNDC}`);
+    debugLog(`Searching FDA NDC API for NDC code: ${cleanNDC} (original: ${ndcCode})`);
 
-    // Search for the specific NDC code
-    const searchResult = await makeAPIRequest({
-      search: `product_ndc:${cleanNDC}`,
-      limit: '20'
-    });
+    // Determine if this is a product NDC (10 digits) or package NDC (11 digits)
+    const isPackageNDC = cleanNDC.length === 11;
+    const isProductNDC = cleanNDC.length === 10;
 
-    if (!searchResult.results || searchResult.results.length === 0) {
-      // Try formatted search (with dashes)
-      if (cleanNDC.length === 11) {
-        const formattedNDC = `${cleanNDC.slice(0,5)}-${cleanNDC.slice(5,9)}-${cleanNDC.slice(9,11)}`;
-        const formattedResult = await makeAPIRequest({
-          search: `product_ndc:"${formattedNDC}"`,
+    let searchResult: any = null;
+
+    // Try different search strategies based on NDC type
+    if (isPackageNDC) {
+      // For 11-digit package NDC, format it properly (5-4-2 or 5-3-2)
+      // Try 5-4-2 format first (most common)
+      const formatted542 = `${cleanNDC.slice(0,5)}-${cleanNDC.slice(5,9)}-${cleanNDC.slice(9,11)}`;
+      debugLog(`Trying package NDC search with 5-4-2 format: ${formatted542}`);
+      
+      try {
+        searchResult = await makeAPIRequest({
+          search: `packaging.package_ndc:"${formatted542}"`,
           limit: '20'
         });
-
-        if (!formattedResult.results || formattedResult.results.length === 0) {
-          return {
-            success: false,
-            ndcs: [],
-            error: {
-              code: 'NO_NDCS_FOUND',
-              message: 'NDC code not found',
-              details: `No NDC found in FDA database for "${ndcCode}"`
-            }
-          };
-        }
-
-        // Process formatted results
-        return processNDCSearchResult(formattedResult, ndcCode);
+      } catch (err) {
+        debugLog('5-4-2 format search failed, trying 5-3-2 format');
       }
 
+      // If no results with 5-4-2, try 5-3-2 format
+      if (!searchResult || !searchResult.results || searchResult.results.length === 0) {
+        const formatted532 = `${cleanNDC.slice(0,5)}-${cleanNDC.slice(5,8)}-${cleanNDC.slice(8,11)}`;
+        debugLog(`Trying package NDC search with 5-3-2 format: ${formatted532}`);
+        
+        try {
+          searchResult = await makeAPIRequest({
+            search: `packaging.package_ndc:"${formatted532}"`,
+            limit: '20'
+          });
+        } catch (err) {
+          debugLog('5-3-2 format search failed');
+        }
+      }
+
+      // If still no results, try searching by unformatted number
+      if (!searchResult || !searchResult.results || searchResult.results.length === 0) {
+        debugLog(`Trying package NDC search without formatting: ${cleanNDC}`);
+        try {
+          searchResult = await makeAPIRequest({
+            search: `packaging.package_ndc:${cleanNDC}`,
+            limit: '20'
+          });
+        } catch (err) {
+          debugLog('Unformatted package NDC search failed');
+        }
+      }
+
+    } else if (isProductNDC) {
+      // For 10-digit product NDC, format as 5-4
+      const formattedProduct = `${cleanNDC.slice(0,5)}-${cleanNDC.slice(5,9)}`;
+      debugLog(`Trying product NDC search: ${formattedProduct}`);
+      
+      try {
+        searchResult = await makeAPIRequest({
+          search: `product_ndc:"${formattedProduct}"`,
+          limit: '20'
+        });
+      } catch (err) {
+        debugLog('Product NDC search failed');
+      }
+
+      // Try unformatted if formatted failed
+      if (!searchResult || !searchResult.results || searchResult.results.length === 0) {
+        try {
+          searchResult = await makeAPIRequest({
+            search: `product_ndc:${cleanNDC}`,
+            limit: '20'
+          });
+        } catch (err) {
+          debugLog('Unformatted product NDC search failed');
+        }
+      }
+    } else {
+      // Unsupported NDC length
+      return {
+        success: false,
+        ndcs: [],
+        error: {
+          code: 'INVALID_NDC_LENGTH',
+          message: 'Invalid NDC length',
+          details: `NDC must be 10 or 11 digits, got ${cleanNDC.length}`
+        }
+      };
+    }
+
+    // Check if we got any results
+    if (!searchResult || !searchResult.results || searchResult.results.length === 0) {
       return {
         success: false,
         ndcs: [],

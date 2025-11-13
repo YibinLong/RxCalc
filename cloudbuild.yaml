@@ -22,17 +22,17 @@ steps:
       - 'run'
       - 'deploy'
       - 'rxcalc'
-      - '--image=us-central1-docker.pkg.dev/rxcalc-app/rxcalc-repo/rxcalc:$BUILD_ID'
+      - 'us-central1-docker.pkg.dev/rxcalc-app/rxcalc-repo/rxcalc:$BUILD_ID'
       - '--region=us-central1'
       - '--platform=managed'
-      - '--allow-unauthenticated'
+      '--allow-unauthenticated'
       - '--port=8080'
-      - '--memory=512Mi'
+      '--memory=512Mi'
       - '--cpu=1'
       - '--timeout=300s'
       - '--concurrency=1000'
       - '--min-instances=0'
-      - '--max-instances=10'
+      '--max-instances=10'
 
 # Configure the build
 options:
