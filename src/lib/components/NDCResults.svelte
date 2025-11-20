@@ -12,6 +12,11 @@
   $: optimalNDCs = quantityResult?.optimalCombination || [];
   $: allCandidates = quantityResult?.candidates || [];
 
+  // Track which buttons have been copied
+  let copiedButtons: Set<string> = new Set();
+  let copiedOptimal = false;
+  let copiedJSON = false;
+
   function formatNDC(ndc: string): string {
     // Format NDC as 5-4-2 format if possible
     if (ndc.length === 11) {
@@ -37,9 +42,18 @@
     return Math.max(0, Math.min(100, Math.round(wastePercent)));
   }
 
-  async function copyToClipboard(text: string, successMessage: string) {
+  async function copyToClipboard(text: string, successMessage: string, buttonId?: string) {
     try {
       await navigator.clipboard.writeText(text);
+      
+      // Show animation on button
+      if (buttonId) {
+        copiedButtons = new Set([...copiedButtons, buttonId]);
+        setTimeout(() => {
+          copiedButtons = new Set([...copiedButtons].filter(id => id !== buttonId));
+        }, 1500);
+      }
+      
       // Create a temporary success message
       const toast = document.createElement('div');
       toast.className = 'toast success';
@@ -60,6 +74,8 @@
       quantityResult,
       timestamp: new Date().toISOString()
     };
+    copiedJSON = true;
+    setTimeout(() => copiedJSON = false, 1500);
     copyToClipboard(JSON.stringify(data, null, 2), 'JSON copied to clipboard!');
   }
 
@@ -69,6 +85,8 @@
       packages: cand.packagesRequired,
       description: cand.packageDescription
     }));
+    copiedOptimal = true;
+    setTimeout(() => copiedOptimal = false, 1500);
     copyToClipboard(JSON.stringify(optimal, null, 2), 'Optimal NDCs copied to clipboard!');
   }
 </script>
@@ -77,19 +95,19 @@
   {#if isCalculating}
     <div class="loading-state">
       <div class="spinner"></div>
-      <h3>🔄 Calculating Optimal NDCs...</h3>
+      <h3>Calculating Optimal NDCs...</h3>
       <p>Analyzing package options and determining the best combination for your prescription.</p>
     </div>
   {:else if calculationError}
     <div class="error-state">
-      <div class="error-icon">⚠️</div>
+      <div class="error-icon">!</div>
       <h3>Calculation Error</h3>
       <p>{calculationError}</p>
     </div>
   {:else if hasResults}
     <!-- Summary Section -->
     <div class="summary-section">
-      <h3>📊 Prescription Summary</h3>
+      <h3>Prescription Summary</h3>
       <div class="summary-grid">
         <div class="summary-item">
           <div class="summary-label">Total Quantity Needed:</div>
@@ -113,7 +131,7 @@
     <!-- Optimal NDC Recommendation -->
     {#if optimalNDCs.length > 0}
       <div class="optimal-section">
-        <h3>⭐ Recommended NDC(s)</h3>
+        <h3>Recommended NDC</h3>
         <div class="optimal-cards">
           {#each optimalNDCs as candidate, index}
             <div class="optimal-card" class:recommended={index === 0}>
@@ -146,7 +164,12 @@
                     </span>
                   </div>
                   <div class="waste-info">
-                    <span class="waste-amount">{Math.round((candidate.packagesRequired * candidate.packageSize) - candidate.quantityNeeded)} units waste</span>
+                    <span 
+                      class="waste-amount" 
+                      class:no-waste={Math.round((candidate.packagesRequired * candidate.packageSize) - candidate.quantityNeeded) === 0}
+                    >
+                      {Math.round((candidate.packagesRequired * candidate.packageSize) - candidate.quantityNeeded)} units wasted
+                    </span>
                   </div>
                 </div>
               </div>
@@ -158,13 +181,29 @@
 
     <!-- Actions Section -->
     <div class="actions-section">
-      <h3>🔧 Actions</h3>
+      <h3>Actions</h3>
       <div class="action-buttons">
-        <button class="btn btn-primary" on:click={copyOptimalNDCs}>
-          📋 Copy Optimal NDCs
+        <button 
+          class="btn btn-copy btn-copy-primary" 
+          class:copied={copiedOptimal}
+          on:click={copyOptimalNDCs}
+        >
+          {#if copiedOptimal}
+            ✓ Copied!
+          {:else}
+            Copy Optimal NDC
+          {/if}
         </button>
-        <button class="btn btn-secondary" on:click={copyJSON}>
-          📄 Copy Full JSON Results
+        <button 
+          class="btn btn-copy btn-copy-secondary" 
+          class:copied={copiedJSON}
+          on:click={copyJSON}
+        >
+          {#if copiedJSON}
+            ✓ Copied!
+          {:else}
+            Copy Full JSON Results
+          {/if}
         </button>
       </div>
     </div>
@@ -172,7 +211,7 @@
     <!-- All Available NDC Options Table -->
     {#if allCandidates.length > 1}
       <div class="all-options-section">
-        <h3>📋 All Available NDC Options</h3>
+        <h3>All Available NDC Options</h3>
         <div class="table-container">
           <table class="ndc-options-table">
             <thead>
@@ -197,7 +236,7 @@
                   <td class="ndc-cell">
                     <span class="ndc-code">{formatNDC(candidate.ndc)}</span>
                     {#if optimalNDCs.some(opt => opt.ndc === candidate.ndc)}
-                      <span class="recommended-indicator">⭐</span>
+                      <span class="recommended-indicator">BEST</span>
                     {/if}
                   </td>
                   <td class="description-cell">{candidate.packageDescription}</td>
@@ -228,13 +267,19 @@
                   <td class="actions-cell">
                     <button
                       class="btn-copy-small"
+                      class:copied={copiedButtons.has(candidate.ndc)}
                       on:click={() => copyToClipboard(
                         formatNDC(candidate.ndc),
-                        'NDC copied to clipboard!'
+                        'NDC copied to clipboard!',
+                        candidate.ndc
                       )}
                       title="Copy NDC"
                     >
-                      📋
+                      {#if copiedButtons.has(candidate.ndc)}
+                        ✓
+                      {:else}
+                        Copy
+                      {/if}
                     </button>
                   </td>
                 </tr>
@@ -249,7 +294,7 @@
     {#if allCandidates.some(c => c.status === 'inactive')}
       <div class="warning-section">
         <div class="warning-header">
-          <span class="warning-icon">⚠️</span>
+          <span class="warning-icon">!</span>
           <h4>Inactive NDCs Detected</h4>
         </div>
         <p>Some NDC options are marked as inactive by the FDA. These may have limited availability or discontinued status.</p>
@@ -306,7 +351,7 @@
   {:else if ndcResult || quantityResult}
     <!-- No Results State -->
     <div class="no-results-state">
-      <div class="no-results-icon">🔍</div>
+      <div class="no-results-icon">?</div>
       <h3>No NDC Results Available</h3>
       <p>Unable to retrieve NDC information or calculate quantities. Please check your input and try again.</p>
     </div>
@@ -455,7 +500,6 @@
   }
 
   .ndc-code {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-weight: 600;
     font-size: 1rem;
     color: #2c3e50;
@@ -533,6 +577,10 @@
     font-weight: 500;
   }
 
+  .waste-amount.no-waste {
+    color: #28a745;
+  }
+
   /* Table Styles */
   .table-container {
     overflow-x: auto;
@@ -574,13 +622,19 @@
   }
 
   .ndc-cell {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-weight: 600;
   }
 
   .recommended-indicator {
     margin-left: 0.5rem;
-    color: #ffc107;
+    background: #28a745;
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .efficiency-cell {
@@ -617,19 +671,11 @@
     text-align: center;
   }
 
-  .btn-copy-small {
-    background: none;
-    border: 1px solid #e1e8ed;
-    border-radius: 4px;
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-  }
-
-  .btn-copy-small:hover {
-    background: #f8f9fa;
-    border-color: #3498db;
+  /* NDC Code Cell - Make it wider to prevent wrapping */
+  .ndc-cell {
+    font-weight: 600;
+    min-width: 140px;
+    white-space: nowrap;
   }
 
   /* Actions Section */
@@ -671,6 +717,60 @@
 
   .btn-secondary:hover {
     background-color: #7f8c8d;
+  }
+
+  /* New Copy Button Styles */
+  .btn-copy {
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .btn-copy-primary {
+    background-color: #3498db;
+  }
+
+  .btn-copy-primary:hover:not(.copied) {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+  }
+
+  .btn-copy-secondary {
+    background-color: #9b59b6;
+  }
+
+  .btn-copy-secondary:hover:not(.copied) {
+    background-color: #8e44ad;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
+  }
+
+  .btn-copy.copied {
+    background-color: #28a745;
+    transform: scale(1.05);
+  }
+
+  .btn-copy-small {
+    background: none;
+    border: 1px solid #e1e8ed;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    min-width: 50px;
+  }
+
+  .btn-copy-small:hover:not(.copied) {
+    background: #f8f9fa;
+    border-color: #6c757d;
+  }
+
+  .btn-copy-small.copied {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+    transform: scale(1.1);
   }
 
   /* Enhanced Warning Section */
@@ -739,7 +839,6 @@
   }
 
   .inactive-ndc-code {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-weight: 600;
     font-size: 0.9rem;
     color: #856404;

@@ -244,8 +244,16 @@ export class QuantityCalculator {
         };
       });
 
-      // Sort by efficiency (least waste first)
-      candidates.sort((a, b) => a.efficiency - b.efficiency);
+      // Sort by efficiency (least waste first), then by packages required (fewest first)
+      candidates.sort((a, b) => {
+        // Primary sort: by efficiency (lower is better)
+        const efficiencyDiff = a.efficiency - b.efficiency;
+        if (efficiencyDiff !== 0) {
+          return efficiencyDiff;
+        }
+        // Secondary sort: by packages required (fewer is better)
+        return a.packagesRequired - b.packagesRequired;
+      });
 
       // Select optimal combination (could be multiple different package sizes)
       const optimalCombination = this.findOptimalCombination(quantityNeeded, candidates);

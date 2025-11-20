@@ -56,15 +56,18 @@
       }
     } else {
       // Manual mode validation
-      if (!manualTablets.trim()) {
+      const tabletsValue = String(manualTablets || '').trim();
+      const timesPerDayValue = String(manualTimesPerDay || '').trim();
+      
+      if (!tabletsValue) {
         errors.manualTablets = 'Tablets/Units per dose is required';
-      } else if (isNaN(Number(manualTablets)) || Number(manualTablets) <= 0) {
+      } else if (isNaN(Number(tabletsValue)) || Number(tabletsValue) <= 0) {
         errors.manualTablets = 'Must be a positive number';
       }
       
-      if (!manualTimesPerDay.trim()) {
+      if (!timesPerDayValue) {
         errors.manualTimesPerDay = 'Times per day is required';
-      } else if (isNaN(Number(manualTimesPerDay)) || Number(manualTimesPerDay) <= 0) {
+      } else if (isNaN(Number(timesPerDayValue)) || Number(timesPerDayValue) <= 0) {
         errors.manualTimesPerDay = 'Must be a positive number';
       }
     }
@@ -169,8 +172,8 @@
         
       } else {
         // Manual Mode - use direct numeric inputs
-        const tablets = Number(manualTablets.trim());
-        const timesPerDay = Number(manualTimesPerDay.trim());
+        const tablets = Number(String(manualTablets || '').trim());
+        const timesPerDay = Number(String(manualTimesPerDay || '').trim());
         
         parsedSigData = {
           amount: tablets,
@@ -431,6 +434,34 @@
     optimizedNDCResult = null;
   }
 
+  function loadExample() {
+    // Reset form first
+    resetForm();
+    
+    // Set to AI mode
+    sigMode = 'ai';
+    
+    // Fill in example data
+    drugInput = 'Amoxicillin';
+    sig = 'Take 1 capsule by mouth three times daily';
+    daysSupply = '10';
+    
+    // Clear any errors
+    errors = {};
+    
+    // Show a helpful message
+    submitMessage = 'Example loaded! Click "Calculate" to see results.';
+    submitMessageType = 'info';
+    
+    // Clear the message after a few seconds
+    setTimeout(() => {
+      if (submitMessage === 'Example loaded! Click "Calculate" to see results.') {
+        submitMessage = '';
+        submitMessageType = '';
+      }
+    }, 3000);
+  }
+
   // Handle keyboard shortcuts
   function handleKeydown(event: KeyboardEvent) {
     // Ctrl/Cmd + Enter to submit
@@ -449,8 +480,20 @@
 
 <div class="container">
   <div class="form-container">
-    <h1>NDC Packaging & Quantity Calculator</h1>
-    <p class="subtitle">Enter prescription information to calculate optimal NDC packaging and dispense quantities</p>
+    <div class="header-section">
+      <div class="header-text">
+        <h1>NDC Packaging & Quantity Calculator</h1>
+        <p class="subtitle">Enter prescription information to calculate optimal NDC packaging and dispense quantities</p>
+      </div>
+      <button 
+        type="button" 
+        class="btn-example" 
+        on:click={loadExample}
+        disabled={isSubmitting}
+      >
+        Try Example
+      </button>
+    </div>
 
     <!-- Success/Error Messages -->
     {#if submitMessage}
@@ -641,6 +684,18 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
 
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
   h1 {
     color: #2c3e50;
     margin-bottom: 0.5rem;
@@ -650,8 +705,34 @@
 
   .subtitle {
     color: #6c757d;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     font-size: 1rem;
+  }
+
+  .btn-example {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #3498db;
+    border-radius: 6px;
+    background: white;
+    color: #3498db;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .btn-example:hover:not(:disabled) {
+    background: #3498db;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+  }
+
+  .btn-example:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .message {
@@ -726,6 +807,7 @@
   textarea.form-control {
     resize: vertical;
     min-height: 80px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   .error-message {
@@ -887,7 +969,6 @@
     background: white;
     border: 1px solid #e1e8ed;
     border-radius: 4px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
   }
 
@@ -919,7 +1000,6 @@
   }
 
   .error-code {
-    font-family: monospace;
     background: #f8d7da;
     padding: 0.25rem 0.5rem;
     border-radius: 3px;
@@ -954,6 +1034,15 @@
 
     .form-container {
       padding: 1.5rem;
+    }
+
+    .header-section {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .btn-example {
+      width: 100%;
     }
 
     .form-actions {
