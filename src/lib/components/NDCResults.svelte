@@ -32,7 +32,9 @@
     if (candidate.packagesRequired === 0) return 0;
     const totalProvided = candidate.packagesRequired * candidate.packageSize;
     const waste = totalProvided - candidate.quantityNeeded;
-    return Math.round((waste / candidate.quantityNeeded) * 100);
+    const wastePercent = (waste / candidate.quantityNeeded) * 100;
+    // Ensure we don't return more than 100% waste (edge case)
+    return Math.max(0, Math.min(100, Math.round(wastePercent)));
   }
 
   async function copyToClipboard(text: string, successMessage: string) {
@@ -140,11 +142,11 @@
                   <div class="efficiency-score">
                     <span class="efficiency-label">Efficiency:</span>
                     <span class="efficiency-value">
-                      {100 - calculateWastePercentage(candidate)}%
+                      {Math.max(0, 100 - calculateWastePercentage(candidate))}%
                     </span>
                   </div>
                   <div class="waste-info">
-                    <span class="waste-amount">{Math.round(candidate.efficiency * candidate.quantityNeeded)} units waste</span>
+                    <span class="waste-amount">{Math.round((candidate.packagesRequired * candidate.packageSize) - candidate.quantityNeeded)} units waste</span>
                   </div>
                 </div>
               </div>
@@ -153,6 +155,19 @@
         </div>
       </div>
     {/if}
+
+    <!-- Actions Section -->
+    <div class="actions-section">
+      <h3>🔧 Actions</h3>
+      <div class="action-buttons">
+        <button class="btn btn-primary" on:click={copyOptimalNDCs}>
+          📋 Copy Optimal NDCs
+        </button>
+        <button class="btn btn-secondary" on:click={copyJSON}>
+          📄 Copy Full JSON Results
+        </button>
+      </div>
+    </div>
 
     <!-- All Available NDC Options Table -->
     {#if allCandidates.length > 1}
@@ -200,15 +215,15 @@
                     <div class="efficiency-bar">
                       <div
                         class="efficiency-fill"
-                        style="width: {100 - calculateWastePercentage(candidate)}%"
+                        style="width: {Math.max(0, 100 - calculateWastePercentage(candidate))}%"
                       ></div>
                       <span class="efficiency-text">
-                        {100 - calculateWastePercentage(candidate)}%
+                        {Math.max(0, 100 - calculateWastePercentage(candidate))}%
                       </span>
                     </div>
                   </td>
                   <td class="waste-cell">
-                    {Math.round(candidate.efficiency * candidate.quantityNeeded)} units
+                    {Math.round((candidate.packagesRequired * candidate.packageSize) - candidate.quantityNeeded)} units
                   </td>
                   <td class="actions-cell">
                     <button
@@ -229,19 +244,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Actions Section -->
-    <div class="actions-section">
-      <h3>🔧 Actions</h3>
-      <div class="action-buttons">
-        <button class="btn btn-primary" on:click={copyOptimalNDCs}>
-          📋 Copy Optimal NDCs
-        </button>
-        <button class="btn btn-secondary" on:click={copyJSON}>
-          📄 Copy Full JSON Results
-        </button>
-      </div>
-    </div>
 
     <!-- Enhanced Warning for Inactive NDCs -->
     {#if allCandidates.some(c => c.status === 'inactive')}

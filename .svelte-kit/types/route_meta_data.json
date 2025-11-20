@@ -1,5 +1,8 @@
 {
 	"/": [],
+	"/api/ai/sig": [
+		"src/routes/api/ai/sig/+server.ts"
+	],
 	"/api/performance-test": [
 		"src/routes/api/performance-test/+server.ts"
 	]

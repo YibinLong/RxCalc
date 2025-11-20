@@ -31,6 +31,7 @@ declare module '$env/static/private' {
 	export const GIT_PS1_SHOWDIRTYSTATE: string;
 	export const TERM_PROGRAM: string;
 	export const NODE: string;
+	export const SSL_CERT_FILE: string;
 	export const INIT_CWD: string;
 	export const QUARTO_ESBUILD: string;
 	export const ANDROID_HOME: string;
@@ -43,12 +44,17 @@ declare module '$env/static/private' {
 	export const CONDA_SHLVL: string;
 	export const TERM_PROGRAM_VERSION: string;
 	export const CONDA_PROMPT_MODIFIER: string;
+	export const EMSDK: string;
+	export const MallocSpaceEfficient: string;
 	export const ANDROID_SDK_ROOT: string;
+	export const MallocNanoZone: string;
 	export const COLOR: string;
 	export const TERM_SESSION_ID: string;
 	export const npm_config_noproxy: string;
 	export const npm_config_local_prefix: string;
+	export const EXTENSION_KIT_EXTENSION_TYPE: string;
 	export const USER: string;
+	export const EMSDK_NODE: string;
 	export const npm_config_globalconfig: string;
 	export const CONDA_EXE: string;
 	export const SSH_AUTH_SOCK: string;
@@ -80,6 +86,7 @@ declare module '$env/static/private' {
 	export const npm_config_npm_version: string;
 	export const XPC_FLAGS: string;
 	export const QUARTO_TYPST: string;
+	export const EMSDK_PYTHON: string;
 	export const npm_config_node_gyp: string;
 	export const QUARTO_DENO_DOM: string;
 	export const QUARTO_SHARE_PATH: string;
@@ -96,6 +103,7 @@ declare module '$env/static/private' {
 	export const QUARTO_DENO: string;
 	export const npm_lifecycle_script: string;
 	export const CONDA_DEFAULT_ENV: string;
+	export const BUN_INSTALL: string;
 	export const npm_config_user_agent: string;
 	export const HOMEBREW_CELLAR: string;
 	export const INFOPATH: string;
@@ -137,6 +145,7 @@ declare module '$env/dynamic/private' {
 		GIT_PS1_SHOWDIRTYSTATE: string;
 		TERM_PROGRAM: string;
 		NODE: string;
+		SSL_CERT_FILE: string;
 		INIT_CWD: string;
 		QUARTO_ESBUILD: string;
 		ANDROID_HOME: string;
@@ -149,12 +158,17 @@ declare module '$env/dynamic/private' {
 		CONDA_SHLVL: string;
 		TERM_PROGRAM_VERSION: string;
 		CONDA_PROMPT_MODIFIER: string;
+		EMSDK: string;
+		MallocSpaceEfficient: string;
 		ANDROID_SDK_ROOT: string;
+		MallocNanoZone: string;
 		COLOR: string;
 		TERM_SESSION_ID: string;
 		npm_config_noproxy: string;
 		npm_config_local_prefix: string;
+		EXTENSION_KIT_EXTENSION_TYPE: string;
 		USER: string;
+		EMSDK_NODE: string;
 		npm_config_globalconfig: string;
 		CONDA_EXE: string;
 		SSH_AUTH_SOCK: string;
@@ -186,6 +200,7 @@ declare module '$env/dynamic/private' {
 		npm_config_npm_version: string;
 		XPC_FLAGS: string;
 		QUARTO_TYPST: string;
+		EMSDK_PYTHON: string;
 		npm_config_node_gyp: string;
 		QUARTO_DENO_DOM: string;
 		QUARTO_SHARE_PATH: string;
@@ -202,6 +217,7 @@ declare module '$env/dynamic/private' {
 		QUARTO_DENO: string;
 		npm_lifecycle_script: string;
 		CONDA_DEFAULT_ENV: string;
+		BUN_INSTALL: string;
 		npm_config_user_agent: string;
 		HOMEBREW_CELLAR: string;
 		INFOPATH: string;

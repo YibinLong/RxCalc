@@ -16,6 +16,11 @@
   let isSubmitting = false;
   let submitMessage = '';
   let submitMessageType: 'success' | 'error' | 'info' | '';
+  
+  // SIG input mode - default to AI
+  let sigMode: 'ai' | 'manual' = 'ai';
+  let manualTablets = '';
+  let manualTimesPerDay = '';
 
   // API results state
   let normalizationResult: DrugNormalizationResult | null = null;
@@ -42,11 +47,26 @@
       errors.drugInput = 'Drug name must be at least 2 characters';
     }
 
-    // SIG validation
-    if (!sig.trim()) {
-      errors.sig = 'SIG (instructions) is required';
-    } else if (sig.trim().length < 5) {
-      errors.sig = 'SIG must be more detailed (at least 5 characters)';
+    // SIG validation - different for AI vs Manual mode
+    if (sigMode === 'ai') {
+      if (!sig.trim()) {
+        errors.sig = 'SIG (instructions) is required';
+      } else if (sig.trim().length < 5) {
+        errors.sig = 'SIG must be more detailed (at least 5 characters)';
+      }
+    } else {
+      // Manual mode validation
+      if (!manualTablets.trim()) {
+        errors.manualTablets = 'Tablets/Units per dose is required';
+      } else if (isNaN(Number(manualTablets)) || Number(manualTablets) <= 0) {
+        errors.manualTablets = 'Must be a positive number';
+      }
+      
+      if (!manualTimesPerDay.trim()) {
+        errors.manualTimesPerDay = 'Times per day is required';
+      } else if (isNaN(Number(manualTimesPerDay)) || Number(manualTimesPerDay) <= 0) {
+        errors.manualTimesPerDay = 'Must be a positive number';
+      }
     }
 
     // Days supply validation
@@ -100,8 +120,69 @@
 
     try {
       const cleanedDrugInput = drugInput.trim();
-      const cleanedSig = sig.trim();
       const cleanedDaysSupply = Number(daysSupply.trim());
+      let cleanedSig = '';
+      let parsedSigData: { amount: number; frequency: number; unit: string } | null = null;
+
+      // Handle SIG parsing based on mode
+      if (sigMode === 'ai') {
+        // AI Mode - parse SIG text with AI
+        cleanedSig = sig.trim();
+        
+        submitMessage = 'Processing SIG with AI...';
+        submitMessageType = 'info';
+        
+        try {
+          const sigResponse = await fetch('/api/ai/sig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sig: cleanedSig })
+          });
+          
+          const sigData = await sigResponse.json();
+          
+          if (!sigData.success) {
+            // Show error toast notification
+            errorHandling.handleAPIError(new Error(sigData.error || 'Could not parse SIG with AI'), 'AI SIG Parsing');
+            submitMessage = `❌ ${sigData.error || 'Failed to parse SIG'}. Try manual mode.`;
+            submitMessageType = 'error';
+            isSubmitting = false;
+            return;
+          }
+          
+          parsedSigData = {
+            amount: sigData.amount,
+            frequency: sigData.frequency,
+            unit: sigData.unit
+          };
+          
+          logUser.action('AI SIG parsed successfully', parsedSigData);
+          
+        } catch (error) {
+          console.error('Error calling AI SIG endpoint:', error);
+          errorHandling.handleAPIError(error, 'AI SIG Service');
+          submitMessage = '❌ Failed to process SIG with AI. Try manual mode.';
+          submitMessageType = 'error';
+          isSubmitting = false;
+          return;
+        }
+        
+      } else {
+        // Manual Mode - use direct numeric inputs
+        const tablets = Number(manualTablets.trim());
+        const timesPerDay = Number(manualTimesPerDay.trim());
+        
+        parsedSigData = {
+          amount: tablets,
+          frequency: timesPerDay,
+          unit: 'tablet'
+        };
+        
+        // Construct a readable SIG for logging
+        cleanedSig = `Take ${tablets} tablet${tablets !== 1 ? 's' : ''} ${timesPerDay} time${timesPerDay !== 1 ? 's' : ''} daily`;
+        
+        logUser.action('Manual SIG input used', parsedSigData);
+      }
 
       // Check if input looks like an NDC
       const isLikelyNDC = validateNDCFormat(cleanedDrugInput);
@@ -208,10 +289,41 @@
       // Show progress notification for quantity calculation
       errorHandling.showProgressNotification('Step 3', `Found ${ndcData.ndcs.length} NDCs. Calculating quantities...`);
 
-      // Step 3: Calculate dispense quantity from SIG and days supply
+      // Step 3: Calculate dispense quantity from parsed SIG and days supply
       console.log('Step 3: Calculating dispense quantity');
 
-      const quantityData = calculateDispenseQuantity(cleanedSig, cleanedDaysSupply);
+      // Use the parsed SIG data directly or fall back to string parsing
+      let quantityData: QuantityCalculationResult;
+      
+      if (parsedSigData) {
+        // Use AI or manual parsed data
+        const totalDailyDose = parsedSigData.amount * parsedSigData.frequency;
+        const totalQuantity = totalDailyDose * cleanedDaysSupply;
+        
+        quantityData = {
+          success: true,
+          totalQuantity: Math.ceil(totalQuantity),
+          unit: parsedSigData.unit,
+          sig: {
+            originalSIG: cleanedSig,
+            dosageInstructions: [{
+              amount: parsedSigData.amount,
+              unit: parsedSigData.unit,
+              frequency: parsedSigData.frequency,
+              timing: undefined,
+              route: undefined
+            }],
+            totalDailyDose,
+            dailyFrequency: parsedSigData.frequency,
+            prn: false
+          },
+          daysSupply: cleanedDaysSupply
+        };
+      } else {
+        // Fallback to rule-based parsing (shouldn't happen with new flow)
+        quantityData = calculateDispenseQuantity(cleanedSig, cleanedDaysSupply);
+      }
+      
       quantityResult = quantityData;
 
       if (!quantityData.success) {
@@ -306,6 +418,8 @@
   function resetForm() {
     drugInput = '';
     sig = '';
+    manualTablets = '';
+    manualTimesPerDay = '';
     daysSupply = '';
     errors = {};
     submitMessage = '';
@@ -366,20 +480,88 @@
 
       <div class="form-group">
         <label for="sig">SIG (Instructions)</label>
-        <textarea
-          id="sig"
-          bind:value={sig}
-          placeholder="e.g., 'Take 1 tablet by mouth twice daily as needed'"
-          class="form-control"
-          class:has-error={errors.sig}
-          on:input={() => clearError('sig')}
-          disabled={isSubmitting}
-          rows="3"
-        ></textarea>
-        {#if errors.sig}
-          <div class="error-message">{errors.sig}</div>
+        
+        <!-- Tab Interface for AI vs Manual Mode -->
+        <div class="sig-mode-tabs">
+          <button
+            type="button"
+            class="tab-button"
+            class:active={sigMode === 'ai'}
+            on:click={() => sigMode = 'ai'}
+            disabled={isSubmitting}
+          >
+            AI Mode (Recommended)
+          </button>
+          <button
+            type="button"
+            class="tab-button"
+            class:active={sigMode === 'manual'}
+            on:click={() => sigMode = 'manual'}
+            disabled={isSubmitting}
+          >
+            Manual Mode
+          </button>
+        </div>
+        
+        <!-- AI Mode: Textarea for SIG text -->
+        {#if sigMode === 'ai'}
+          <textarea
+            id="sig"
+            bind:value={sig}
+            placeholder="e.g., 'Take 1 tablet by mouth twice daily as needed'"
+            class="form-control"
+            class:has-error={errors.sig}
+            on:input={() => clearError('sig')}
+            disabled={isSubmitting}
+            rows="3"
+          ></textarea>
+          {#if errors.sig}
+            <div class="error-message">{errors.sig}</div>
+          {/if}
+          <small class="form-help">Enter prescription instructions in natural language - AI will extract dosage information</small>
+        {:else}
+          <!-- Manual Mode: Simple numeric inputs -->
+          <div class="manual-inputs">
+            <div class="manual-input-group">
+              <label for="manualTablets" class="manual-label">Tablets/Units per dose</label>
+              <input
+                id="manualTablets"
+                type="number"
+                bind:value={manualTablets}
+                placeholder="e.g., 1"
+                class="form-control"
+                class:has-error={errors.manualTablets}
+                on:input={() => clearError('manualTablets')}
+                disabled={isSubmitting}
+                min="0.5"
+                step="0.5"
+              />
+              {#if errors.manualTablets}
+                <div class="error-message">{errors.manualTablets}</div>
+              {/if}
+            </div>
+            
+            <div class="manual-input-group">
+              <label for="manualTimesPerDay" class="manual-label">Times per day</label>
+              <input
+                id="manualTimesPerDay"
+                type="number"
+                bind:value={manualTimesPerDay}
+                placeholder="e.g., 2"
+                class="form-control"
+                class:has-error={errors.manualTimesPerDay}
+                on:input={() => clearError('manualTimesPerDay')}
+                disabled={isSubmitting}
+                min="1"
+                step="1"
+              />
+              {#if errors.manualTimesPerDay}
+                <div class="error-message">{errors.manualTimesPerDay}</div>
+              {/if}
+            </div>
+          </div>
+          <small class="form-help">Enter dosage amounts directly</small>
         {/if}
-        <small class="form-help">Dosage instructions as written on the prescription</small>
       </div>
 
       <div class="form-group">
@@ -557,6 +739,61 @@
     font-size: 0.8rem;
   }
 
+  /* SIG Mode Tabs */
+  .sig-mode-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tab-button {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    background: white;
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab-button:hover:not(:disabled) {
+    border-color: #3498db;
+    color: #3498db;
+  }
+
+  .tab-button.active {
+    border-color: #3498db;
+    background: #3498db;
+    color: white;
+  }
+
+  .tab-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Manual Mode Inputs */
+  .manual-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .manual-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .manual-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+  }
+
   .form-actions {
     display: flex;
     gap: 1rem;
@@ -725,6 +962,10 @@
 
     .btn {
       width: 100%;
+    }
+    
+    .manual-inputs {
+      grid-template-columns: 1fr;
     }
   }
 </style>
