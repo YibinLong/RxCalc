@@ -210,9 +210,6 @@
       submitMessage = `Step 1: Normalizing ${isLikelyNDC ? 'NDC' : 'drug name'}...`;
       submitMessageType = 'info';
 
-      // Show progress notification
-      errorHandling.showProgressNotification('Step 1', `Normalizing ${isLikelyNDC ? 'NDC' : 'drug name'}...`);
-
       const normResult = await normalizeDrugToRxCUI(cleanedDrugInput);
       normalizationResult = normResult;
 
@@ -242,9 +239,6 @@
 
       submitMessage = `✓ Found RxCUI: ${normResult.rxcui} for "${normResult.drugName}". Fetching NDCs...`;
       submitMessageType = 'info';
-
-      // Show progress notification for NDC retrieval
-      errorHandling.showProgressNotification('Step 2', `Found RxCUI: ${normResult.rxcui}. Fetching NDCs...`);
 
       // Step 2: Get NDCs - optimized approach based on input type
       console.log('Step 2: Fetching NDCs for:', normResult.rxcui ? normResult.rxcui : normResult.drugName);
@@ -288,9 +282,6 @@
 
       submitMessage = `✓ Found ${ndcData.ndcs.length} NDC options. Calculating quantities...`;
       submitMessageType = 'info';
-
-      // Show progress notification for quantity calculation
-      errorHandling.showProgressNotification('Step 3', `Found ${ndcData.ndcs.length} NDCs. Calculating quantities...`);
 
       // Step 3: Calculate dispense quantity from parsed SIG and days supply
       console.log('Step 3: Calculating dispense quantity');
@@ -349,9 +340,6 @@
 
       submitMessage = `✓ Need ${quantityData.totalQuantity} ${quantityData.unit}s. Optimizing NDC selection...`;
       submitMessageType = 'info';
-
-      // Show progress notification for optimization
-      errorHandling.showProgressNotification('Step 4', `Need ${quantityData.totalQuantity} ${quantityData.unit}s. Optimizing NDC selection...`);
 
       // Step 4: Optimize NDC selection
       console.log('Step 4: Optimizing NDC selection');
@@ -912,12 +900,14 @@
   }
 
   .btn-secondary {
-    background-color: #95a5a6;
+    background-color: #e74c3c;
     color: white;
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background-color: #7f8c8d;
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
   }
 
   .btn-small {

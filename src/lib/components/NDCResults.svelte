@@ -723,6 +723,7 @@
   .btn-copy {
     color: white;
     transition: all 0.3s ease;
+    min-width: 200px; /* Fixed width to prevent shrinking when text changes */
   }
 
   .btn-copy-primary {
