@@ -5,7 +5,6 @@
   import { errorHandling } from '$lib/services/errorHandling';
   import { logger, logApi, logUser, logCalculation } from '$lib/services/logger';
   import NDCResults from '$lib/components/NDCResults.svelte';
-  import Toast from '$lib/components/Toast.svelte';
   import DebugPanel from '$lib/components/DebugPanel.svelte';
 
   // Form state
@@ -653,9 +652,6 @@
     {/if}
   </div>
 </div>
-
-<!-- Toast Notifications -->
-<Toast position="top-right" />
 
 <style>
   .container {

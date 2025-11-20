@@ -37,19 +37,20 @@ class ErrorHandlingService {
         suggestedAction: 'Please check your internet connection and try again'
       };
 
-      toast.error('Connection Error', appError.suggestedAction, {
-        persistent: true,
-        actions: [
-          {
-            label: 'Retry',
-            action: () => {
-              // The form will need to be re-submitted
-              logUser.action('Retry drug normalization');
-            },
-            primary: true
-          }
-        ]
-      });
+      // Toast notifications disabled
+      // toast.error('Connection Error', appError.suggestedAction, {
+      //   persistent: true,
+      //   actions: [
+      //     {
+      //       label: 'Retry',
+      //       action: () => {
+      //         // The form will need to be re-submitted
+      //         logUser.action('Retry drug normalization');
+      //       },
+      //       primary: true
+      //     }
+      //   ]
+      // });
     } else if (error?.status === 404) {
       appError = {
         type: 'api',
@@ -60,9 +61,10 @@ class ErrorHandlingService {
         suggestedAction: 'Check the spelling or try a different drug name or NDC'
       };
 
-      toast.error('Drug Not Found', appError.suggestedAction, {
-        persistent: true
-      });
+      // Toast notifications disabled
+      // toast.error('Drug Not Found', appError.suggestedAction, {
+      //   persistent: true
+      // });
     } else if (error?.status === 429) {
       appError = {
         type: 'api',
@@ -73,9 +75,10 @@ class ErrorHandlingService {
         suggestedAction: 'Please wait a moment and try again'
       };
 
-      toast.warning('Rate Limit', appError.suggestedAction, {
-        duration: 8000
-      });
+      // Toast notifications disabled
+      // toast.warning('Rate Limit', appError.suggestedAction, {
+      //   duration: 8000
+      // });
     } else {
       appError = {
         type: 'unknown',
@@ -86,9 +89,10 @@ class ErrorHandlingService {
         suggestedAction: 'Please try again or contact support if the problem persists'
       };
 
-      toast.error('Unexpected Error', appError.suggestedAction, {
-        persistent: true
-      });
+      // Toast notifications disabled
+      // toast.error('Unexpected Error', appError.suggestedAction, {
+      //   persistent: true
+      // });
     }
 
     logApi.error('Drug normalization failed', {
@@ -114,9 +118,10 @@ class ErrorHandlingService {
         suggestedAction: 'Please check your internet connection and try again'
       };
 
-      toast.error('FDA API Connection Error', appError.suggestedAction, {
-        persistent: true
-      });
+      // Toast notifications disabled
+      // toast.error('FDA API Connection Error', appError.suggestedAction, {
+      //   persistent: true
+      // });
     } else if (error?.status === 404 || error?.code === 'NO_NDCS_FOUND' || error?.code === 'UNSUPPORTED_SEARCH') {
       appError = {
         type: 'api',
@@ -131,9 +136,10 @@ class ErrorHandlingService {
           'This medication may not be available in commercial packages'
       };
 
-      toast.warning('Limited NDC Data', appError.suggestedAction, {
-        duration: 6000
-      });
+      // Toast notifications disabled
+      // toast.warning('Limited NDC Data', appError.suggestedAction, {
+      //   duration: 6000
+      // });
     } else if (error?.code === 'NETWORK_ERROR') {
       appError = {
         type: 'network',
@@ -144,9 +150,10 @@ class ErrorHandlingService {
         suggestedAction: 'Please check your internet connection and try again'
       };
 
-      toast.error('FDA API Connection Error', appError.suggestedAction, {
-        persistent: true
-      });
+      // Toast notifications disabled
+      // toast.error('FDA API Connection Error', appError.suggestedAction, {
+      //   persistent: true
+      // });
     } else {
       appError = {
         type: 'api',
@@ -157,9 +164,10 @@ class ErrorHandlingService {
         suggestedAction: 'Please try again or contact support'
       };
 
-      toast.error('NDC Retrieval Error', appError.suggestedAction, {
-        persistent: true
-      });
+      // Toast notifications disabled
+      // toast.error('NDC Retrieval Error', appError.suggestedAction, {
+      //   persistent: true
+      // });
     }
 
     logApi.error('NDC retrieval failed', {
@@ -182,20 +190,21 @@ class ErrorHandlingService {
       suggestedAction: 'Please check the SIG format and try again'
     };
 
-    toast.error('Calculation Error', appError.suggestedAction, {
-      persistent: true,
-      actions: [
-        {
-          label: 'Check SIG Format',
-          action: () => {
-            toast.info('SIG Format Help', 'Use formats like "Take 1 tablet twice daily" or "2 capsules by mouth every 8 hours"', {
-              duration: 8000
-            });
-          },
-          primary: false
-        }
-      ]
-    });
+    // Toast notifications disabled
+    // toast.error('Calculation Error', appError.suggestedAction, {
+    //   persistent: true,
+    //   actions: [
+    //     {
+    //       label: 'Check SIG Format',
+    //       action: () => {
+    //         toast.info('SIG Format Help', 'Use formats like "Take 1 tablet twice daily" or "2 capsules by mouth every 8 hours"', {
+    //           duration: 8000
+    //         });
+    //       },
+    //       primary: false
+    //     }
+    //   ]
+    // });
 
     logCalculation.error('Quantity calculation failed', {
       error,
@@ -217,9 +226,10 @@ class ErrorHandlingService {
       suggestedAction: 'Please try again or contact support'
     };
 
-    toast.error('Optimization Error', appError.suggestedAction, {
-      persistent: true
-    });
+    // Toast notifications disabled
+    // toast.error('Optimization Error', appError.suggestedAction, {
+    //   persistent: true
+    // });
 
     logCalculation.error('NDC optimization failed', {
       error,
@@ -235,31 +245,32 @@ class ErrorHandlingService {
   handleInactiveNDCWarning(inactiveNDCs: any[]): void {
     const count = inactiveNDCs.length;
 
-    toast.warning(
-      `${count} Inactive NDC${count !== 1 ? 's' : ''} Detected`,
-      `Some NDC options are marked as inactive by the FDA and may have limited availability.`,
-      {
-        persistent: true,
-        actions: [
-          {
-            label: 'View Details',
-            action: () => {
-              logUser.action('View inactive NDC details', { inactiveNDCs });
-            },
-            primary: false
-          },
-          {
-            label: 'Proceed with Caution',
-            action: () => {
-              toast.info('Please verify with your pharmacy before dispensing inactive NDCs', {
-                duration: 6000
-              });
-            },
-            primary: true
-          }
-        ]
-      }
-    );
+    // Toast notifications disabled
+    // toast.warning(
+    //   `${count} Inactive NDC${count !== 1 ? 's' : ''} Detected`,
+    //   `Some NDC options are marked as inactive by the FDA and may have limited availability.`,
+    //   {
+    //     persistent: true,
+    //     actions: [
+    //       {
+    //         label: 'View Details',
+    //         action: () => {
+    //           logUser.action('View inactive NDC details', { inactiveNDCs });
+    //         },
+    //         primary: false
+    //       },
+    //       {
+    //         label: 'Proceed with Caution',
+    //         action: () => {
+    //           toast.info('Please verify with your pharmacy before dispensing inactive NDCs', {
+    //             duration: 6000
+    //           });
+    //         },
+    //         primary: true
+    //       }
+    //     ]
+    //   }
+    // );
 
     logger.warn('NDC', 'Inactive NDCs detected', inactiveNDCs);
   }
@@ -277,19 +288,20 @@ class ErrorHandlingService {
       suggestedAction: 'Please try again or contact support if the problem persists'
     };
 
-    if (error?.status >= 500) {
-      toast.error('Server Error', 'The server is experiencing issues. Please try again later.', {
-        persistent: true
-      });
-    } else if (error?.status >= 400) {
-      toast.error('Request Error', appError.suggestedAction, {
-        persistent: true
-      });
-    } else {
-      toast.error('Connection Error', 'Please check your internet connection and try again.', {
-        persistent: true
-      });
-    }
+    // Toast notifications disabled
+    // if (error?.status >= 500) {
+    //   toast.error('Server Error', 'The server is experiencing issues. Please try again later.', {
+    //     persistent: true
+    //   });
+    // } else if (error?.status >= 400) {
+    //   toast.error('Request Error', appError.suggestedAction, {
+    //     persistent: true
+    //   });
+    // } else {
+    //   toast.error('Connection Error', 'Please check your internet connection and try again.', {
+    //     persistent: true
+    //   });
+    // }
 
     logApi.error(`API error in ${context}`, {
       error,
@@ -304,28 +316,29 @@ class ErrorHandlingService {
     const errorCount = Object.keys(errors).length;
     const firstError = Object.values(errors)[0];
 
-    toast.error(
-      `${errorCount} Validation Error${errorCount !== 1 ? 's' : ''}`,
-      firstError || 'Please check the form and correct any errors',
-      {
-        persistent: true,
-        actions: [
-          {
-            label: 'Review Form',
-            action: () => {
-              // Focus on first error field
-              const firstErrorField = Object.keys(errors)[0];
-              const element = document.getElementById(firstErrorField);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.focus();
-              }
-            },
-            primary: true
-          }
-        ]
-      }
-    );
+    // Toast notifications disabled
+    // toast.error(
+    //   `${errorCount} Validation Error${errorCount !== 1 ? 's' : ''}`,
+    //   firstError || 'Please check the form and correct any errors',
+    //   {
+    //     persistent: true,
+    //     actions: [
+    //       {
+    //         label: 'Review Form',
+    //         action: () => {
+    //           // Focus on first error field
+    //           const firstErrorField = Object.keys(errors)[0];
+    //           const element = document.getElementById(firstErrorField);
+    //           if (element) {
+    //             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    //             element.focus();
+    //           }
+    //         },
+    //         primary: true
+    //       }
+    //     ]
+    //   }
+    // );
 
     logValidation.error(errors);
   }
@@ -338,51 +351,61 @@ class ErrorHandlingService {
     waste: number;
     totalQuantity: number;
   }): void {
-    toast.success(
-      'Calculation Complete',
-      `Optimal solution: ${result.totalPackages} package${result.totalPackages !== 1 ? 's' : ''} needed (${result.waste} units waste)`,
-      {
-        duration: 5000,
-        actions: [
-          {
-            label: 'View Details',
-            action: () => {
-              // Scroll to results
-              const resultsElement = document.querySelector('.ndc-display-container');
-              if (resultsElement) {
-                resultsElement.scrollIntoView({ behavior: 'smooth' });
-              }
-            },
-            primary: true
-          }
-        ]
-      }
-    );
+    // Toast notifications disabled
+    // toast.success(
+    //   'Calculation Complete',
+    //   `Optimal solution: ${result.totalPackages} package${result.totalPackages !== 1 ? 's' : ''} needed (${result.waste} units waste)`,
+    //   {
+    //     duration: 5000,
+    //     actions: [
+    //       {
+    //         label: 'View Details',
+    //         action: () => {
+    //           // Scroll to results
+    //           const resultsElement = document.querySelector('.ndc-display-container');
+    //           if (resultsElement) {
+    //             resultsElement.scrollIntoView({ behavior: 'smooth' });
+    //           }
+    //         },
+    //         primary: true
+    //       }
+    //     ]
+    //   }
+    // );
   }
 
   /**
    * Show progress notification for long-running operations
    */
   showProgressNotification(step: string, message: string): void {
-    toast.info(step, message, {
-      duration: 2000,
-      persistent: false
-    });
+    // Toast notifications disabled
+    // toast.info(step, message, {
+    //   duration: 2000,
+    //   persistent: false
+    // });
   }
 }
 
 // Export singleton instance
 export const errorHandling = new ErrorHandlingService();
 
-// Export convenience functions
-export const showError = (title: string, message: string, options?: any) =>
-  toast.error(title, message, options);
+// Export convenience functions (disabled)
+export const showError = (title: string, message: string, options?: any) => {
+  // Toast notifications disabled
+  // toast.error(title, message, options);
+};
 
-export const showWarning = (title: string, message: string, options?: any) =>
-  toast.warning(title, message, options);
+export const showWarning = (title: string, message: string, options?: any) => {
+  // Toast notifications disabled
+  // toast.warning(title, message, options);
+};
 
-export const showSuccess = (title: string, message: string, options?: any) =>
-  toast.success(title, message, options);
+export const showSuccess = (title: string, message: string, options?: any) => {
+  // Toast notifications disabled
+  // toast.success(title, message, options);
+};
 
-export const showInfo = (title: string, message: string, options?: any) =>
-  toast.info(title, message, options);
+export const showInfo = (title: string, message: string, options?: any) => {
+  // Toast notifications disabled
+  // toast.info(title, message, options);
+};
