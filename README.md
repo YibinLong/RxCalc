@@ -279,7 +279,7 @@ When you calculate for **Amoxicillin**, **"Take 1 capsule three times daily"**, 
 
 ## 📄 License
 
-This project is private and not licensed for public distribution.
+This project is licensed under the [MIT License](LICENSE.md).
 
 ---
 
